@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Git Pre-Commit Hook for Digitact Terraform Modules
+#
+# This hook auto-fixes formatting issues before commit.
+# Changes are automatically staged so they're included in the commit.
+#
+# Installation:
+#   Automatically installed by: make install-hooks
+#
+# What it does for Terraform:
+#   - Auto-formats all Terraform module files (terraform fmt)
+#   - Stages any changes so they're included in the commit
+#
+# Expected duration: ~2 seconds
+
+set -euo pipefail
+
+# Colour output for better readability
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Colour
+
+# Check if we're in the right directory (Terraform modules repo)
+if [ ! -d "labelling" ]; then
+    exit 0
+fi
+
+# Track if we made any changes
+CHANGES_MADE=false
+TF_STAGED=false
+
+# Check what's being committed
+if git diff --cached --name-only | grep -q "\.tf$"; then
+    TF_STAGED=true
+fi
+
+# Exit early if nothing relevant is staged
+if [ "$TF_STAGED" = false ]; then
+    exit 0
+fi
+
+echo ""
+echo -e "${BLUE}Pre-commit: Auto-formatting staged Terraform module files${NC}"
+
+# ============================================================================
+# TERRAFORM FORMATTING
+# ============================================================================
+if [ "$TF_STAGED" = true ]; then
+    echo -e "${BLUE}  Terraform Modules:${NC}"
+
+    # Auto-format all Terraform files in the repository
+    if ! terraform fmt -check -recursive . >/dev/null 2>&1; then
+        terraform fmt -recursive . >/dev/null 2>&1
+
+        # Stage all modified .tf files
+        git diff --name-only | grep "\.tf$" | xargs -r git add
+
+        CHANGES_MADE=true
+        echo -e "${GREEN}    ✓ terraform fmt applied to all modules${NC}"
+    else
+        echo -e "${GREEN}    ✓ terraform fmt OK${NC}"
+    fi
+fi
+
+# ============================================================================
+# SUMMARY
+# ============================================================================
+if [ "$CHANGES_MADE" = true ]; then
+    echo -e "${GREEN}✓ Pre-commit fixes applied and staged${NC}"
+else
+    echo -e "${GREEN}✓ All module files already formatted${NC}"
+fi
+echo ""
+
+exit 0

@@ -1,0 +1,332 @@
+name: Terraform CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  TERRAFORM_VERSION: "latest"  # Always use latest stable
+  TFLINT_VERSION: "latest"     # Always use latest stable
+  TRIVY_VERSION: "latest"      # Always use latest stable
+
+jobs:
+  # =============================================================================
+  # Format Check
+  # =============================================================================
+  format:
+    name: Terraform Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive -diff
+        continue-on-error: false
+
+  # =============================================================================
+  # Validate
+  # =============================================================================
+  validate:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - labelling
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ matrix.module }}/.terraform
+            ${{ matrix.module }}/.terraform.lock.hcl
+          key: ${{ runner.os }}-terraform-${{ matrix.module }}-${{ hashFiles(format('{0}/**/*.tf', matrix.module)) }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-${{ matrix.module }}-
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+        working-directory: ${{ matrix.module }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ matrix.module }}
+
+  # =============================================================================
+  # Lint
+  # =============================================================================
+  lint:
+    name: TFLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
+
+      - name: Show TFLint version
+        run: tflint --version
+
+      - name: Init TFLint
+        run: tflint --init
+
+      - name: Run TFLint
+        run: tflint --recursive --format compact
+
+  # =============================================================================
+  # Security Scan
+  # =============================================================================
+  security:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy security scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'  # Fail on HIGH/CRITICAL vulnerabilities
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # =============================================================================
+  # Terraform Test - Naming Validation
+  # =============================================================================
+  test-naming:
+    name: Test - Naming Validation
+    runs-on: ubuntu-latest
+    needs: [format, validate]  # Run tests only if format and validate pass
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            labelling/.terraform
+            labelling/.terraform.lock.hcl
+          key: ${{ runner.os }}-terraform-test-naming-${{ hashFiles('labelling/**/*.tf') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-test-naming-
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+        working-directory: labelling
+
+      - name: Run Naming Validation Tests
+        run: terraform test -filter=tests/naming_validation.tftest.hcl -verbose
+        working-directory: labelling
+
+  # =============================================================================
+  # Terraform Test - Staging Environment
+  # =============================================================================
+  test-staging:
+    name: Test - Staging Environment
+    runs-on: ubuntu-latest
+    needs: [format, validate]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            labelling/.terraform
+            labelling/.terraform.lock.hcl
+          key: ${{ runner.os }}-terraform-test-staging-${{ hashFiles('labelling/**/*.tf') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-test-staging-
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+        working-directory: labelling
+
+      - name: Run Staging Environment Tests
+        run: terraform test -filter=tests/staging_environment.tftest.hcl -verbose
+        working-directory: labelling
+
+  # =============================================================================
+  # Terraform Test - Production Environment
+  # =============================================================================
+  test-production:
+    name: Test - Production Environment
+    runs-on: ubuntu-latest
+    needs: [format, validate]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            labelling/.terraform
+            labelling/.terraform.lock.hcl
+          key: ${{ runner.os }}-terraform-test-production-${{ hashFiles('labelling/**/*.tf') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-test-production-
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+        working-directory: labelling
+
+      - name: Run Production Environment Tests
+        run: terraform test -filter=tests/production_environment.tftest.hcl -verbose
+        working-directory: labelling
+
+  # =============================================================================
+  # Terraform Test - Failure Scenarios (Negative Testing)
+  # =============================================================================
+  test-failures:
+    name: Test - Failure Scenarios
+    runs-on: ubuntu-latest
+    needs: [format, validate]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            labelling/.terraform
+            labelling/.terraform.lock.hcl
+          key: ${{ runner.os }}-terraform-test-failures-${{ hashFiles('labelling/**/*.tf') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-test-failures-
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+        working-directory: labelling
+
+      - name: Run Failure Scenarios Tests
+        run: terraform test -filter=tests/failure_scenarios.tftest.hcl -verbose
+        working-directory: labelling
+
+  # =============================================================================
+  # All Tests Combined (Run all test files at once)
+  # =============================================================================
+  test-all:
+    name: Test - All Tests Combined
+    runs-on: ubuntu-latest
+    needs: [test-naming, test-staging, test-production, test-failures]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            labelling/.terraform
+            labelling/.terraform.lock.hcl
+          key: ${{ runner.os }}-terraform-test-all-${{ hashFiles('labelling/**/*.tf') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-test-all-
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+        working-directory: labelling
+
+      - name: Run All Tests
+        run: terraform test -verbose
+        working-directory: labelling
+
+  # =============================================================================
+  # Status Check - All Jobs Must Pass
+  # =============================================================================
+  status:
+    name: CI Status Check
+    runs-on: ubuntu-latest
+    needs:
+      - format
+      - validate
+      - lint
+      - security
+      - test-naming
+      - test-staging
+      - test-production
+      - test-failures
+      - test-all
+    if: always()
+    steps:
+      - name: Check CI status
+        run: |
+          if [[ "${{ needs.format.result }}" != "success" ]] || \
+             [[ "${{ needs.validate.result }}" != "success" ]] || \
+             [[ "${{ needs.lint.result }}" != "success" ]] || \
+             [[ "${{ needs.security.result }}" != "success" ]] || \
+             [[ "${{ needs.test-naming.result }}" != "success" ]] || \
+             [[ "${{ needs.test-staging.result }}" != "success" ]] || \
+             [[ "${{ needs.test-production.result }}" != "success" ]] || \
+             [[ "${{ needs.test-all.result }}" != "success" ]]; then
+            echo "❌ CI pipeline failed"
+            echo "Format: ${{ needs.format.result }}"
+            echo "Validate: ${{ needs.validate.result }}"
+            echo "Lint: ${{ needs.lint.result }}"
+            echo "Security: ${{ needs.security.result }}"
+            echo "Test Naming: ${{ needs.test-naming.result }}"
+            echo "Test Staging: ${{ needs.test-staging.result }}"
+            echo "Test Production: ${{ needs.test-production.result }}"
+            echo "Test All: ${{ needs.test-all.result }}"
+            exit 1
+          fi
+          echo "✅ All CI checks passed successfully!"

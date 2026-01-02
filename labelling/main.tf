@@ -25,16 +25,5 @@
 #   - ManagedBy
 #   - Layer
 # =============================================================================
-
-locals {
-  # Environment display names for tags
-  environment_display = {
-    prd  = "production"
-    nprd = "nonprod"
-    dev  = "development"
-    stg  = "staging"
-  }
-
-  # Base prefix for all resources
-  prefix = "${var.product}-${var.environment}-${var.application}"
-}
+#
+# NOTE: Local values, naming constraints, and validations are defined in locals.tf

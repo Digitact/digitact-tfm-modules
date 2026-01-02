@@ -1,0 +1,253 @@
+# =============================================================================
+# Terraform Modules Repository - .gitignore
+# =============================================================================
+
+# Terraform Files
+# ============================================================================
+**/.terraform/*
+# Note: Module lock files are committed to show tested provider versions
+# Only ignore lock files in examples/tests
+examples/**/.terraform.lock.hcl
+test-fixtures/**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Terraform Variables (may contain sensitive data)
+*.auto.tfvars
+*.auto.tfvars.json
+**/terraform.tfvars
+**/terraform.tfvars.json
+**/secrets.tfvars
+**/backend.tfvars
+**/backend-config/*.hcl
+
+# Terraform Plugin Cache
+.terraform.d/
+plugin-cache/
+
+# =============================================================================
+# IDE and Editor Files
+# =============================================================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# =============================================================================
+# Operating System Files
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Testing and Development
+# =============================================================================
+
+# Test Files (but NOT Terraform .tftest.hcl files)
+# Note: Terraform test files (*.tftest.hcl) are committed as part of the module
+# Only ignore generic test directories and artifacts
+test/
+*.test
+.test-data/
+test-results/
+test-output/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Coverage Reports
+coverage/
+*.coverage
+coverage.out
+coverage.html
+
+# =============================================================================
+# Build and Distribution
+# =============================================================================
+
+# Build Artifacts
+build/
+dist/
+out/
+target/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# =============================================================================
+# Security and Secrets
+# =============================================================================
+
+# AWS Credentials
+.aws/credentials
+.aws/config
+
+# Private Keys
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.pub
+*.crt
+*.cer
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Secrets
+secrets/
+*.secret
+*.secrets
+
+# =============================================================================
+# Documentation Build Artifacts
+# =============================================================================
+
+# terraform-docs
+.terraform-docs.yml.backup
+
+# =============================================================================
+# Git and Version Control
+# =============================================================================
+
+# Git Hooks (installed versions - not templates)
+.git/hooks/pre-commit
+.git/hooks/pre-push
+.git/hooks/commit-msg
+.git/hooks/pre-rebase
+
+# GitHub
+.github/workflows/*.yml.backup
+
+# =============================================================================
+# Docker
+# =============================================================================
+
+# Docker Compose
+docker-compose.override.yml
+
+# =============================================================================
+# Module-Specific Ignores
+# =============================================================================
+
+# Example configurations (may contain sensitive test data)
+examples/**/terraform.tfvars
+examples/**/.terraform
+examples/**/*.tfstate
+examples/**/*.tfstate.backup
+
+# Module test directories
+**/test-fixtures/
+
+# =============================================================================
+# Miscellaneous
+# =============================================================================
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Editor Backup Files
+*.orig
+
+# Node.js (if using pre-commit framework)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python (if using pre-commit framework)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+.venv/
+pip-log.txt
+
+# Cache directories
+.cache/
+.tflint.d/
+.trivy-cache/

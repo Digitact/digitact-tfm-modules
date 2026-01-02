@@ -8,9 +8,14 @@
 # =============================================================================
 
 variable "product" {
-  description = "Product prefix for resource naming"
+  description = "Product prefix for resource naming (e.g., 'whub' for WineHub, 'prkr' for PerkRunner)"
   type        = string
   default     = "whub"
+
+  validation {
+    condition     = can(regex("^[a-z][a-z0-9]{2,7}$", var.product))
+    error_message = "Product must be 3-8 lowercase alphanumeric characters, starting with a letter. Examples: whub, prkr, dgtct"
+  }
 }
 
 variable "environment" {
@@ -24,12 +29,33 @@ variable "environment" {
 }
 
 variable "application" {
-  description = "Application name (e.g., zoho-crm, analytics, api)"
+  description = <<-EOD
+    Application name (e.g., zoho-crm, analytics, api)
+
+    IMPORTANT: Total prefix length (product-env-app) should not exceed 22 characters
+    to ensure compatibility with ALB/NLB resources and allow 6-character developer suffixes.
+
+    Examples:
+    - whub-prd-api (11 chars) ✓
+    - whub-prd-analytics (17 chars) ✓
+    - whub-nprd-zoho-crm (16 chars) ✓
+    - whub-prd-customer-portal (23 chars) ✗ TOO LONG for ALB/NLB
+  EOD
   type        = string
 
   validation {
-    condition     = can(regex("^[a-z][a-z0-9-]{2,19}$", var.application))
-    error_message = "Application must be 3-20 lowercase alphanumeric characters with hyphens"
+    condition     = can(regex("^[a-z][a-z0-9-]*[a-z0-9]$", var.application))
+    error_message = "Application must contain only lowercase letters, numbers, and hyphens. Must start with a letter and end with a letter or number. No consecutive hyphens, no leading/trailing hyphens."
+  }
+
+  validation {
+    condition     = length(var.application) >= 3 && length(var.application) <= 20
+    error_message = "Application name must be 3-20 characters long to ensure total prefix stays within AWS resource naming limits."
+  }
+
+  validation {
+    condition     = !can(regex("--", var.application))
+    error_message = "Application name cannot contain consecutive hyphens (--). This violates AWS naming rules for RDS, S3, and other resources."
   }
 }
 
