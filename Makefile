@@ -112,8 +112,8 @@ tf-lint: ## Run tflint on all modules (via Docker)
 		-v $(HOME)/.cache/tflint-docker:/root/.tflint.d \
 		-w /workspace \
 		ghcr.io/terraform-linters/tflint:$(TFLINT_VERSION) \
-		--recursive --format=compact --minimum-failure-severity=error
-	@echo "✅ tflint checks passed"
+		--recursive --format=compact
+	@echo "✅ tflint checks passed (0 warnings, 0 errors)"
 
 # ============================================================================
 # SECURITY SCANNING
