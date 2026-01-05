@@ -116,7 +116,7 @@ output "name" {
     # =========================================================================
 
     # S3 (bucket names must be globally unique, use prefix carefully)
-    s3_bucket           = "${local.prefix}"
+    s3_bucket           = local.prefix
     s3_bucket_logs      = "${local.prefix}-logs"
     s3_bucket_artifacts = "${local.prefix}-artifacts"
     s3_bucket_backups   = "${local.prefix}-backups"
@@ -125,7 +125,7 @@ output "name" {
     dynamodb_table = "${local.prefix}-table"
 
     # ECR
-    ecr_repository = "${local.prefix}"
+    ecr_repository = local.prefix
 
     # =========================================================================
     # MESSAGING (4 resource types)
@@ -170,7 +170,7 @@ output "name" {
 
     # Route53
     route53_zone   = "${var.application}.${var.environment}.example.com"
-    route53_record = "${local.prefix}"
+    route53_record = local.prefix
 
     # =========================================================================
     # API GATEWAY (4 resource types)
@@ -285,7 +285,7 @@ output "name_tag" {
     security_group_vpc_endpoint = "${local.prefix}-vpce-sg"
 
     # EC2 Instances (Name tag is primary identifier in console)
-    ec2_instance = "${local.prefix}"
+    ec2_instance = local.prefix
     ec2_bastion  = "${local.prefix}-bastion"
     ec2_worker   = "${local.prefix}-worker"
 
@@ -355,7 +355,7 @@ output "tags_with_name" {
     security_group_bastion      = merge(local.mandatory_tags, { Name = "${local.prefix}-bastion-sg" })
     security_group_vpc_endpoint = merge(local.mandatory_tags, { Name = "${local.prefix}-vpce-sg" })
 
-    ec2_instance = merge(local.mandatory_tags, { Name = "${local.prefix}" })
+    ec2_instance = merge(local.mandatory_tags, { Name = local.prefix })
     ec2_bastion  = merge(local.mandatory_tags, { Name = "${local.prefix}-bastion" })
     ec2_worker   = merge(local.mandatory_tags, { Name = "${local.prefix}-worker" })
 

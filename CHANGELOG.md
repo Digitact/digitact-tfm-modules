@@ -8,43 +8,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **BREAKING**: New mandatory `repository` variable to track which git repository manages the infrastructure
-- `Repository` tag added to all mandatory tags (now 7 tags total)
-- Validation for repository names (lowercase letters, numbers, hyphens, underscores, 2-100 characters)
-- Comprehensive testing infrastructure (51 tests: 32 positive + 19 negative)
-- Automated versioning and release workflow
-- Git hooks for code quality
-- Support for 95+ AWS resource types
-
-### Changed
-- **BREAKING**: Module now requires `repository` parameter in all module invocations
-- Mandatory tags count increased from 6 to 7
-- Updated all documentation and examples to include repository parameter
-
-### Deprecated
 - N/A
 
-### Removed
+### Changed
 - N/A
 
 ### Fixed
 - N/A
 
-### Security
-- N/A
+---
 
-### Migration Guide
-When upgrading to this version, add the `repository` parameter to all module invocations:
+## [1.0.0] - 2026-01-06
 
-```hcl
-module "naming" {
-  source      = "..."
-  environment = "prd"
-  application = "api"
-  repository  = "my-infrastructure-repo"  # NEW: Add this line
-  # ... other parameters
-}
-```
+### Added
+- Initial release of terraform labelling module
+- Mandatory `repository` variable to track which git repository manages infrastructure
+- Seven mandatory tags: Application, Environment, Criticality, Backup, ManagedBy, Layer, Repository
+- Comprehensive validation for repository names (lowercase letters, numbers, hyphens, underscores, 2-100 characters)
+- Support for 95+ AWS resource types with naming patterns
+- Automated testing infrastructure (51 tests: 32 positive + 19 negative scenarios)
+- Automated versioning and release workflow via GitHub Actions
+- Git hooks for code quality (pre-commit formatting, pre-push validation)
+- Comprehensive documentation with usage examples
+
+### Configuration
+- Terraform required version: >=1.14.0
+- AWS provider version: >=6.0, <7.0 (enforces 6.x series with multi-region support)
+- GitHub Actions use major version tags for automatic updates:
+  - `aquasecurity/trivy-action@0.33.1` for security scanning
+  - `softprops/action-gh-release@v2` for release automation
+
+### Quality
+- Zero tflint warnings (removed deprecated interpolation syntax and unused locals)
+- All tests passing with latest Terraform 1.14.3
+- Security scanning enabled with Trivy
 
 ---
 
@@ -59,22 +56,7 @@ When making changes, update the **[Unreleased]** section above with your changes
 - **Fixed** for any bug fixes
 - **Security** in case of vulnerabilities
 
-When creating a release, the GitHub Actions workflow will automatically generate release notes from commits. However, you can also manually maintain this changelog for additional context.
-
-### Example Entry Format
-
-```markdown
-## [1.0.0] - 2025-01-02
-
-### Added
-- Initial release of labelling module
-- Support for 95+ AWS resource types
-- Automated testing with 51 test scenarios
-- Comprehensive documentation
-
-### Fixed
-- Fixed S3 naming validation for lowercase requirements
-```
+When creating a release, move the **[Unreleased]** changes to a new version section.
 
 ## Reference Links
 

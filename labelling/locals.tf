@@ -17,102 +17,6 @@ locals {
 
   # ==========================================================================
   # AWS RESOURCE NAMING CONSTRAINTS
-  # ==========================================================================
-  # Based on AWS documentation, these are the character limits for resource names.
-  # We reserve 6 characters for developer suffixes (e.g., "-abcde")
-  #
-  # Reference: https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html
-
-  naming_limits = {
-    # MOST RESTRICTIVE RESOURCES (32 characters)
-    alb_nlb = {
-      max_total      = 32 # AWS limit for ALB/NLB names
-      reserved       = 6  # Reserved for developer suffixes
-      longest_suffix = 4  # "-alb" or "-nlb"
-      max_prefix     = 22 # 32 - 4 - 6 = 22
-    }
-
-    target_group = {
-      max_total      = 32 # AWS limit for target group names
-      reserved       = 6
-      longest_suffix = 8  # "-nlb-tg"
-      max_prefix     = 18 # 32 - 8 - 6 = 18
-    }
-
-    # MODERATE RESTRICTIONS (63-64 characters)
-    rds_instance = {
-      max_total      = 63 # AWS limit: 1-63 alphanumeric or hyphens
-      reserved       = 6
-      longest_suffix = 13 # "-aurora-inst"
-      max_prefix     = 44 # 63 - 13 - 6 = 44
-    }
-
-    s3_bucket = {
-      max_total      = 63 # AWS limit: 3-63 characters
-      reserved       = 6
-      longest_suffix = 10                             # "-artifacts"
-      max_prefix     = 47                             # 63 - 10 - 6 = 47
-      pattern        = "^[a-z0-9][a-z0-9-]*[a-z0-9]$" # Lowercase, no underscores
-    }
-
-    iam_role = {
-      max_total      = 64 # AWS limit for role names
-      reserved       = 6
-      longest_suffix = 20 # "-ecs-exec-role" or similar
-      max_prefix     = 38 # 64 - 20 - 6 = 38
-    }
-
-    iam_user = {
-      max_total      = 64
-      reserved       = 6
-      longest_suffix = 5  # "-user"
-      max_prefix     = 53 # 64 - 5 - 6 = 53
-    }
-
-    lambda = {
-      max_total      = 64 # AWS limit for function names
-      reserved       = 6
-      longest_suffix = 17 # "-lambda-permission" (longest in our set)
-      max_prefix     = 41 # 64 - 17 - 6 = 41
-    }
-
-    sqs_queue = {
-      max_total      = 80 # AWS limit for SQS queue names
-      reserved       = 6
-      longest_suffix = 24 # "-sqs_queue_high_priority" (PROBLEM!)
-      max_prefix     = 50 # 80 - 24 - 6 = 50
-      note           = "FIFO queues must end with .fifo"
-    }
-
-    # GENEROUS LIMITS (128+ characters)
-    iam_policy = {
-      max_total      = 128
-      reserved       = 6
-      longest_suffix = 7   # "-policy"
-      max_prefix     = 115 # 128 - 7 - 6 = 115
-    }
-
-    security_group = {
-      max_total      = 255
-      reserved       = 6
-      longest_suffix = 13  # "-bastion-sg" or similar
-      max_prefix     = 236 # 255 - 13 - 6 = 236
-    }
-
-    ecs_cluster = {
-      max_total      = 255
-      reserved       = 6
-      longest_suffix = 19  # "-capacity-provider" (within ECS family)
-      max_prefix     = 230 # 255 - 19 - 6 = 230
-    }
-
-    log_group = {
-      max_total      = 512
-      reserved       = 6
-      longest_suffix = 30  # "/aws/lambda/" prefix + name
-      max_prefix     = 476 # 512 - 30 - 6 = 476
-    }
-  }
 
   # ==========================================================================
   # VALIDATION: Check prefix against most restrictive limit
@@ -123,22 +27,7 @@ locals {
   # We'll validate against ALB/NLB limit (22 chars) as a practical maximum
   # and document resources that need shorter prefixes.
 
-  max_safe_prefix_length = 22 # Based on ALB/NLB constraints
-
-  prefix_validation = {
-    is_valid = local.prefix_length <= local.max_safe_prefix_length
-    message  = "Prefix '${local.prefix}' is ${local.prefix_length} characters. Maximum recommended is ${local.max_safe_prefix_length} to support ALB/NLB resources with 6-character developer suffix buffer."
-  }
-
-  # ==========================================================================
-  # WARNING MESSAGES for resources with tight constraints
-  # ==========================================================================
-  # Resources that may exceed limits with the current prefix
-
-  resource_warnings = {
-    target_group = local.prefix_length > 18 ? "WARNING: Prefix length ${local.prefix_length} may exceed Target Group limit (18 chars recommended)" : ""
-    alb_nlb      = local.prefix_length > 22 ? "WARNING: Prefix length ${local.prefix_length} may exceed ALB/NLB limit (22 chars recommended)" : ""
-  }
+  max_safe_prefix_length = 22 # Based on ALB/NLB constraints (32 char limit - 4 suffix - 6 reserved)
 
   # ==========================================================================
   # Environment Display Mapping
