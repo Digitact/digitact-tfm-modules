@@ -21,6 +21,7 @@ run "valid_short_prefix" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify prefix is correct
@@ -71,6 +72,7 @@ run "valid_longer_prefix" {
     criticality = "medium"
     backup      = "tier-2"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify prefix is constructed correctly
@@ -99,6 +101,7 @@ run "s3_lowercase_check" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify S3 bucket name contains only lowercase
@@ -127,6 +130,7 @@ run "no_consecutive_hyphens" {
     criticality = "high"
     backup      = "none"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify no consecutive hyphens in prefix
@@ -155,6 +159,7 @@ run "no_leading_trailing_hyphens" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify no leading hyphen
@@ -183,6 +188,7 @@ run "sqs_fifo_naming" {
     criticality = "critical"
     backup      = "none"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify FIFO queue has .fifo suffix
@@ -211,6 +217,7 @@ run "output_keys_exist" {
     criticality = "low"
     backup      = "none"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify critical output keys exist
@@ -258,6 +265,7 @@ run "environment_display_names" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -279,6 +287,7 @@ run "tags_with_name_helper" {
     criticality = "medium"
     backup      = "tier-2"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify tags_with_name includes Name tag
@@ -312,6 +321,7 @@ run "additional_tags_merge" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
     additional_tags = {
       CostCenter = "Engineering"
       Owner      = "Platform Team"

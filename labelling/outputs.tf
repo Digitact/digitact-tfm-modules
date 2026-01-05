@@ -305,7 +305,7 @@ output "name_tag" {
 }
 
 output "mandatory_tags" {
-  description = "All 6 mandatory WineHub tags (for resource-level tags)"
+  description = "All 7 mandatory tags including Repository (for resource-level tags)"
   value       = local.mandatory_tags
 }
 
@@ -318,6 +318,7 @@ output "default_tags" {
     Backup      = var.backup
     ManagedBy   = "Terraform"
     Layer       = var.layer
+    Repository  = var.repository
   }
 }
 

@@ -160,6 +160,7 @@ locals {
     Backup      = var.backup
     ManagedBy   = "Terraform"
     Layer       = var.layer
+    Repository  = var.repository
   }, var.additional_tags)
 }
 

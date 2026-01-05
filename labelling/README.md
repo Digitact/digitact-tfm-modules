@@ -17,6 +17,7 @@
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment code (prd, nprd, dev, stg) | `string` | n/a | yes |
 | <a name="input_layer"></a> [layer](#input\_layer) | Architecture layer designation | `string` | `"application"` | no |
 | <a name="input_product"></a> [product](#input\_product) | Product prefix for resource naming (e.g., 'whub' for WineHub, 'prkr' for PerkRunner) | `string` | `"whub"` | no |
+| <a name="input_repository"></a> [repository](#input\_repository) | Git repository name (e.g., 'howards-folly-wine', 'agnostic-1'). Used for the Repository tag to track which codebase manages this infrastructure. | `string` | n/a | yes |
 
 ## Outputs
 
@@ -24,7 +25,7 @@
 |------|-------------|
 | <a name="output_default_tags"></a> [default\_tags](#output\_default\_tags) | Tags for AWS provider default\_tags block |
 | <a name="output_environment_display"></a> [environment\_display](#output\_environment\_display) | Human-readable environment name |
-| <a name="output_mandatory_tags"></a> [mandatory\_tags](#output\_mandatory\_tags) | All 6 mandatory WineHub tags (for resource-level tags) |
+| <a name="output_mandatory_tags"></a> [mandatory\_tags](#output\_mandatory\_tags) | All 7 mandatory tags including Repository (for resource-level tags) |
 | <a name="output_name"></a> [name](#output\_name) | Map of resource types to full compliant names (for resources with 'name' argument) |
 | <a name="output_name_tag"></a> [name\_tag](#output\_name\_tag) | Map of resource types that require a 'Name' tag (resources without 'name' argument or where Name tag is preferred) |
 | <a name="output_prefix"></a> [prefix](#output\_prefix) | Base resource name prefix (whub-{env}-{app}) |

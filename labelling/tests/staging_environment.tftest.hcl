@@ -21,6 +21,7 @@ run "staging_winehub_api" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify staging-specific configurations
@@ -69,6 +70,7 @@ run "staging_analytics" {
     criticality = "medium"
     backup      = "tier-2"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -108,6 +110,7 @@ run "staging_zoho_crm" {
     criticality = "medium"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -146,6 +149,7 @@ run "staging_customer_portal" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -184,6 +188,7 @@ run "staging_shared_infra" {
     criticality = "critical"
     backup      = "none"
     layer       = "shared-infrastructure"
+    repository  = "test-repo"
   }
 
   assert {
@@ -222,6 +227,7 @@ run "staging_perkrunner_benefits" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -254,6 +260,7 @@ run "development_testing" {
     criticality = "low"
     backup      = "none"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -290,6 +297,7 @@ run "staging_webhooks" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # SQS queues for webhook processing
@@ -329,6 +337,7 @@ run "staging_observability" {
     criticality = "medium"
     backup      = "none"
     layer       = "shared-infrastructure"
+    repository  = "test-repo"
   }
 
   # CloudWatch resources

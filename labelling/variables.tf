@@ -96,6 +96,21 @@ variable "layer" {
   }
 }
 
+variable "repository" {
+  description = "Git repository name (e.g., 'howards-folly-wine', 'agnostic-1'). Used for the Repository tag to track which codebase manages this infrastructure."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[a-z0-9][a-z0-9-_]*[a-z0-9]$", var.repository))
+    error_message = "Repository must contain only lowercase letters, numbers, hyphens, and underscores. Must start and end with a letter or number."
+  }
+
+  validation {
+    condition     = length(var.repository) >= 2 && length(var.repository) <= 100
+    error_message = "Repository name must be 2-100 characters long."
+  }
+}
+
 variable "additional_tags" {
   description = "Additional tags to merge with mandatory tags"
   type        = map(string)

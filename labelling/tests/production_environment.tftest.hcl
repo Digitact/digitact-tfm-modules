@@ -22,6 +22,7 @@ run "production_winehub_api" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Verify production prefix
@@ -74,6 +75,7 @@ run "production_database" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -119,6 +121,7 @@ run "production_cache" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -150,6 +153,7 @@ run "production_data_lake" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # S3 bucket names (globally unique, lowercase only)
@@ -188,6 +192,7 @@ run "production_customer_portal" {
     criticality = "critical"
     backup      = "none" # Frontend assets don't need backup (stored in git)
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # CloudFront for global CDN
@@ -222,6 +227,7 @@ run "production_vpc" {
     criticality = "critical"
     backup      = "none"
     layer       = "shared-infrastructure"
+    repository  = "test-repo"
   }
 
   # VPC resources use Name tags
@@ -278,6 +284,7 @@ run "production_ecs" {
     criticality = "critical"
     backup      = "none"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # ECS cluster
@@ -323,6 +330,7 @@ run "production_lambda" {
     criticality = "critical"
     backup      = "none"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Lambda function
@@ -363,6 +371,7 @@ run "production_queues" {
     criticality = "critical"
     backup      = "none"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Standard queue
@@ -403,6 +412,7 @@ run "production_secrets" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # Secrets Manager naming
@@ -441,6 +451,7 @@ run "non_production_testing" {
     criticality = "medium"
     backup      = "tier-2"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -473,6 +484,7 @@ run "production_perkrunner" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   assert {
@@ -505,6 +517,7 @@ run "production_governance" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "governance"
+    repository  = "test-repo"
   }
 
   assert {

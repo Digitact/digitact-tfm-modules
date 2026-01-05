@@ -17,13 +17,14 @@
 # Naming Convention: {product}-{env}-{app}-{resource}
 # Example: whub-stg-zoho-crm-lambda
 #
-# Required Tags (6 per NEW_ACCOUNT_STANDARDS.md):
+# Required Tags (7 mandatory):
 #   - Application
 #   - Environment
 #   - Criticality
 #   - Backup
 #   - ManagedBy
 #   - Layer
+#   - Repository
 # =============================================================================
 #
 # NOTE: Local values, naming constraints, and validations are defined in locals.tf

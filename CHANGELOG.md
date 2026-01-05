@@ -8,13 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **BREAKING**: New mandatory `repository` variable to track which git repository manages the infrastructure
+- `Repository` tag added to all mandatory tags (now 7 tags total)
+- Validation for repository names (lowercase letters, numbers, hyphens, underscores, 2-100 characters)
 - Comprehensive testing infrastructure (51 tests: 32 positive + 19 negative)
 - Automated versioning and release workflow
 - Git hooks for code quality
 - Support for 95+ AWS resource types
 
 ### Changed
-- N/A
+- **BREAKING**: Module now requires `repository` parameter in all module invocations
+- Mandatory tags count increased from 6 to 7
+- Updated all documentation and examples to include repository parameter
 
 ### Deprecated
 - N/A
@@ -27,6 +32,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 - N/A
+
+### Migration Guide
+When upgrading to this version, add the `repository` parameter to all module invocations:
+
+```hcl
+module "naming" {
+  source      = "..."
+  environment = "prd"
+  application = "api"
+  repository  = "my-infrastructure-repo"  # NEW: Add this line
+  # ... other parameters
+}
+```
 
 ---
 

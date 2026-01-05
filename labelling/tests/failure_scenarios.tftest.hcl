@@ -27,6 +27,7 @@ run "fail_prefix_too_long" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
   # Total: digitact-prd-customer-portal-v2 = 31 characters (exceeds 22-char limit)
 
@@ -49,6 +50,7 @@ run "fail_s3_uppercase" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -69,6 +71,7 @@ run "fail_leading_hyphen" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -89,6 +92,7 @@ run "fail_trailing_hyphen" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -109,6 +113,7 @@ run "fail_consecutive_hyphens" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -133,6 +138,7 @@ run "fail_product_too_short" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -153,6 +159,7 @@ run "fail_product_too_long" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -173,6 +180,7 @@ run "fail_product_uppercase" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -193,6 +201,7 @@ run "fail_product_special_chars" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -213,6 +222,7 @@ run "fail_invalid_environment" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -233,6 +243,7 @@ run "fail_application_too_short" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -253,6 +264,7 @@ run "fail_application_too_long" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -273,6 +285,7 @@ run "fail_application_starts_with_number" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -293,6 +306,7 @@ run "fail_application_ends_with_hyphen" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -313,6 +327,7 @@ run "fail_invalid_criticality" {
     criticality = "super-critical" # Must be: critical, high, medium, low
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -333,6 +348,7 @@ run "fail_invalid_backup" {
     criticality = "critical"
     backup      = "tier-4" # Must be: none, tier-1, tier-2, tier-3
     layer       = "application"
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -353,6 +369,7 @@ run "fail_invalid_layer" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "presentation" # Must be: governance, shared-infrastructure, application
+    repository  = "test-repo"
   }
 
   expect_failures = [
@@ -379,6 +396,7 @@ run "pass_application_at_max_length" {
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # This should NOT fail - prefix should be exactly 22 chars (at safe limit)
@@ -404,6 +422,7 @@ run "pass_prefix_at_safe_limit" {
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
+    repository  = "test-repo"
   }
 
   # This should NOT fail - it's exactly at the 22-char safe boundary

@@ -16,6 +16,7 @@ module "naming" {
 
   environment = "stg"
   application = "analytics"
+  repository  = "analytics-service"
   criticality = "high"
   backup      = "tier-1"
   layer       = "application"
@@ -24,12 +25,12 @@ module "naming" {
 
 ## Output Structure
 
-The module provides 6 outputs:
+The module provides 7 outputs:
 
 1. **`prefix`** - Base name prefix: `whub-stg-analytics`
 2. **`name`** - Map of resource names for resources with `name` argument
 3. **`name_tag`** - Map of resource names for resources requiring `Name` tag
-4. **`mandatory_tags`** - All 6 mandatory tags
+4. **`mandatory_tags`** - All 7 mandatory tags (including Repository)
 5. **`tags_with_name`** - Mandatory tags + Name tag for specific resources
 6. **`default_tags`** - Tags for AWS provider `default_tags` block
 7. **`environment_display`** - Human-readable environment name
@@ -133,6 +134,7 @@ resource "aws_s3_bucket" "data" {
 module "naming" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "web-api"
   criticality = "critical"
   backup      = "tier-1"
@@ -206,6 +208,7 @@ resource "aws_security_group" "alb" {
 module "naming" {
   source      = "./labelling"
   environment = "stg"
+  repository  = "infrastructure-repo"
   application = "api"
   criticality = "high"
   backup      = "none"
@@ -299,6 +302,7 @@ resource "aws_cloudwatch_log_group" "ecs" {
 module "naming" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "analytics-db"
   criticality = "critical"
   backup      = "tier-1"  # Automated backups enabled
@@ -356,6 +360,7 @@ resource "aws_rds_cluster_instance" "main" {
 module "naming" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "webhook-processor"
   criticality = "high"
   backup      = "none"
@@ -417,6 +422,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
 module "naming" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "data-lake"
   criticality = "medium"
   backup      = "tier-2"
@@ -481,6 +487,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
 module "naming" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "order-processing"
   criticality = "high"
   backup      = "none"
@@ -552,6 +559,7 @@ resource "aws_cloudwatch_metric_alarm" "queue_age" {
 module "naming" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "web"
   criticality = "critical"
   backup      = "none"
@@ -633,6 +641,7 @@ resource "aws_lb_listener" "https" {
 module "naming" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "api"
   criticality = "high"
   backup      = "none"
@@ -695,6 +704,7 @@ Managing multiple applications in the same codebase:
 module "naming_api" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "api"
   criticality = "critical"
   backup      = "tier-1"
@@ -705,6 +715,7 @@ module "naming_api" {
 module "naming_worker" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "worker"
   criticality = "high"
   backup      = "none"
@@ -715,6 +726,7 @@ module "naming_worker" {
 module "naming_analytics" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "analytics"
   criticality = "medium"
   backup      = "tier-2"
@@ -744,12 +756,13 @@ resource "aws_rds_cluster" "analytics" {
 
 ## Additional Tags Example
 
-Adding custom tags beyond the 6 mandatory tags:
+Adding custom tags beyond the 7 mandatory tags:
 
 ```hcl
 module "naming" {
   source      = "./labelling"
   environment = "prd"
+  repository  = "infrastructure-repo"
   application = "api"
   criticality = "critical"
   backup      = "tier-1"
@@ -763,8 +776,8 @@ module "naming" {
   }
 }
 
-# All resources will now have 10 tags:
-# - Application, Environment, Criticality, Backup, ManagedBy, Layer (mandatory)
+# All resources will now have 11 tags:
+# - Application, Environment, Criticality, Backup, ManagedBy, Layer, Repository (mandatory)
 # - Team, CostCenter, Compliance, DataClass (additional)
 
 resource "aws_s3_bucket" "data" {
@@ -835,6 +848,7 @@ Use descriptive role names with the application context:
 # Good
 module "naming" {
   source      = "./labelling"
+  repository  = "infrastructure-repo"
   application = "api-ecs-task"
   # Results in: whub-prd-api-ecs-task-role
 }
@@ -842,6 +856,7 @@ module "naming" {
 # Avoid
 module "naming" {
   source      = "./labelling"
+  repository  = "infrastructure-repo"
   application = "role"  # Too generic
 }
 ```
