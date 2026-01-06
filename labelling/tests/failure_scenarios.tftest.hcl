@@ -15,21 +15,21 @@ mock_provider "aws" {}
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# Test: Prefix Too Long (Exceeds 22-character safe limit)
+# Test: Prefix Too Long (Exceeds 32-character safe limit)
 # -----------------------------------------------------------------------------
 run "fail_prefix_too_long" {
   command = plan
 
   variables {
     product     = "digitact"           # 8 chars
-    environment = "prd"                # 3 chars
-    application = "customer-portal-v2" # 18 chars
+    environment = "p"                  # 1 char
+    application = "customer-portal-with-analytics" # 30 chars
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
     repository  = "test-repo"
   }
-  # Total: digitact-prd-customer-portal-v2 = 31 characters (exceeds 22-char limit)
+  # Total: digitact-p-customer-portal-with-analytics = 41 characters (exceeds 32-char limit)
 
   expect_failures = [
     check.prefix_length_validation,
@@ -45,7 +45,7 @@ run "fail_s3_uppercase" {
 
   variables {
     product     = "WHub" # Uppercase not allowed
-    environment = "prd"
+    environment = "p"
     application = "data-lake"
     criticality = "high"
     backup      = "tier-1"
@@ -66,7 +66,7 @@ run "fail_leading_hyphen" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "-api" # Leading hyphen not allowed
     criticality = "high"
     backup      = "tier-1"
@@ -87,7 +87,7 @@ run "fail_trailing_hyphen" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "api-" # Trailing hyphen not allowed
     criticality = "high"
     backup      = "tier-1"
@@ -108,7 +108,7 @@ run "fail_consecutive_hyphens" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "web--api" # Consecutive hyphens not allowed
     criticality = "high"
     backup      = "tier-1"
@@ -133,7 +133,7 @@ run "fail_product_too_short" {
 
   variables {
     product     = "ab" # Must be 3-8 characters
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "critical"
     backup      = "tier-1"
@@ -154,7 +154,7 @@ run "fail_product_too_long" {
 
   variables {
     product     = "verylongproductcode" # Must be 3-8 characters
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "critical"
     backup      = "tier-1"
@@ -175,7 +175,7 @@ run "fail_product_uppercase" {
 
   variables {
     product     = "WHub" # Must be lowercase
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "critical"
     backup      = "tier-1"
@@ -196,7 +196,7 @@ run "fail_product_special_chars" {
 
   variables {
     product     = "whub!" # Only alphanumeric allowed
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "critical"
     backup      = "tier-1"
@@ -217,7 +217,7 @@ run "fail_invalid_environment" {
 
   variables {
     product     = "whub"
-    environment = "production" # Must be one of: prd, nprd, dev, stg
+    environment = "production" # Must be one of: p, pp, np, s, u, t, d
     application = "api"
     criticality = "critical"
     backup      = "tier-1"
@@ -238,7 +238,7 @@ run "fail_application_too_short" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "ab" # Must be 3-20 characters
     criticality = "critical"
     backup      = "tier-1"
@@ -259,7 +259,7 @@ run "fail_application_too_long" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "this-is-a-very-long-application-name-exceeding-limit" # Must be 3-20 characters
     criticality = "critical"
     backup      = "tier-1"
@@ -280,7 +280,7 @@ run "fail_application_starts_with_number" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "1api" # Must start with letter
     criticality = "critical"
     backup      = "tier-1"
@@ -301,7 +301,7 @@ run "fail_application_ends_with_hyphen" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "api-" # Cannot end with hyphen
     criticality = "critical"
     backup      = "tier-1"
@@ -322,7 +322,7 @@ run "fail_invalid_criticality" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "super-critical" # Must be: critical, high, medium, low
     backup      = "tier-1"
@@ -343,7 +343,7 @@ run "fail_invalid_backup" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "critical"
     backup      = "tier-4" # Must be: none, tier-1, tier-2, tier-3
@@ -364,7 +364,7 @@ run "fail_invalid_layer" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "critical"
     backup      = "tier-1"
@@ -384,51 +384,51 @@ run "fail_invalid_layer" {
 # -----------------------------------------------------------------------------
 # Test: Application Name at Maximum Length for Prefix Limit (Should Pass)
 # -----------------------------------------------------------------------------
-# For whub-prd-{app}: 4 + 3 + 2 hyphens = 9 chars used
-# Remaining for app to stay at 22-char limit: 22 - 9 = 13 chars
+# For whub-p-{app}: 4 + 1 + 2 hyphens = 7 chars used
+# Remaining for app to stay at 32-char limit: 32 - 7 = 25 chars
 run "pass_application_at_max_length" {
   command = plan
 
   variables {
     product     = "whub"
-    environment = "prd"
-    application = "app-thirteen1" # Exactly 13 characters (max for this prefix combo)
+    environment = "p"
+    application = "app-twenty-five-chars1234" # Exactly 25 characters (max for this prefix combo)
     criticality = "critical"
     backup      = "tier-1"
     layer       = "application"
     repository  = "test-repo"
   }
 
-  # This should NOT fail - prefix should be exactly 22 chars (at safe limit)
+  # This should NOT fail - prefix should be exactly 32 chars (at safe limit)
   # No expect_failures means we expect success
   assert {
-    condition     = length(output.prefix) == 22
-    error_message = "Prefix should be exactly 22 characters (at safe limit), got ${length(output.prefix)}"
+    condition     = length(output.prefix) == 32
+    error_message = "Prefix should be exactly 32 characters (at safe limit), got ${length(output.prefix)}"
   }
 }
 
 # -----------------------------------------------------------------------------
 # Test: Prefix Exactly at Safe Limit (Should Pass)
 # -----------------------------------------------------------------------------
-# For whub-nprd-{app}: 4 + 4 + 2 hyphens = 10 chars used
-# Remaining for app to stay at 22-char limit: 22 - 10 = 12 chars
+# For whub-np-{app}: 4 + 2 + 2 hyphens = 8 chars used
+# Remaining for app to stay at 32-char limit: 32 - 8 = 24 chars
 run "pass_prefix_at_safe_limit" {
   command = plan
 
   variables {
     product     = "whub"
-    environment = "nprd"
-    application = "app-twelve12" # Exactly 12 characters
+    environment = "np"
+    application = "app-twenty-four-chars123" # Exactly 24 characters
     criticality = "high"
     backup      = "tier-1"
     layer       = "application"
     repository  = "test-repo"
   }
 
-  # This should NOT fail - it's exactly at the 22-char safe boundary
-  # whub-nprd-app-twelve12 = 4 + 4 + 12 + 2 = 22 chars
+  # This should NOT fail - it's exactly at the 32-char safe boundary
+  # whub-np-app-twenty-four-chars123 = 4 + 2 + 24 + 2 = 32 chars
   assert {
-    condition     = length(output.prefix) == 22
-    error_message = "Prefix should be exactly 22 characters (at safe limit), got ${length(output.prefix)}"
+    condition     = length(output.prefix) == 32
+    error_message = "Prefix should be exactly 32 characters (at safe limit), got ${length(output.prefix)}"
   }
 }

@@ -17,7 +17,7 @@ run "production_winehub_api" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "critical"
     backup      = "tier-1"
@@ -27,7 +27,7 @@ run "production_winehub_api" {
 
   # Verify production prefix
   assert {
-    condition     = output.prefix == "whub-prd-api"
+    condition     = output.prefix == "whub-p-api"
     error_message = "Production API prefix incorrect"
   }
 
@@ -51,13 +51,13 @@ run "production_winehub_api" {
 
   # Verify ALB naming (production ALB handles customer traffic)
   assert {
-    condition     = output.name.alb == "whub-prd-api-alb"
+    condition     = output.name_with_suffix.alb == "whub-p-api-alb"
     error_message = "Production ALB name incorrect"
   }
 
   # Verify target group naming
   assert {
-    condition     = output.name.target_group_alb == "whub-prd-api-alb-tg"
+    condition     = output.name_with_suffix.target_group == "whub-p-api-tg"
     error_message = "Production ALB target group name incorrect"
   }
 }
@@ -70,7 +70,7 @@ run "production_database" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "db-primary"
     criticality = "critical"
     backup      = "tier-1"
@@ -79,32 +79,20 @@ run "production_database" {
   }
 
   assert {
-    condition     = output.prefix == "whub-prd-db-primary"
+    condition     = output.prefix == "whub-p-db-primary"
     error_message = "Production database prefix incorrect"
   }
 
   # Production RDS instance
   assert {
-    condition     = output.name.rds_instance == "whub-prd-db-primary-rds"
+    condition     = output.name_with_suffix.rds_instance == "whub-p-db-primary-rds"
     error_message = "Production RDS instance name incorrect"
   }
 
   # Aurora cluster for high availability
   assert {
-    condition     = output.name.aurora_cluster == "whub-prd-db-primary-aurora"
+    condition     = output.name_with_suffix.aurora_cluster == "whub-p-db-primary-aurora"
     error_message = "Production Aurora cluster name incorrect"
-  }
-
-  # DB subnet group
-  assert {
-    condition     = output.name.db_subnet_group == "whub-prd-db-primary-db-subnet"
-    error_message = "Production DB subnet group name incorrect"
-  }
-
-  # Parameter groups
-  assert {
-    condition     = output.name.db_parameter_group == "whub-prd-db-primary-db-params"
-    error_message = "Production DB parameter group name incorrect"
   }
 }
 
@@ -116,7 +104,7 @@ run "production_cache" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "redis-cache"
     criticality = "high"
     backup      = "tier-1"
@@ -125,18 +113,8 @@ run "production_cache" {
   }
 
   assert {
-    condition     = output.name.elasticache_replication_group == "whub-prd-redis-cache-redis"
-    error_message = "Production Redis replication group name incorrect"
-  }
-
-  assert {
-    condition     = output.name.elasticache_subnet_group == "whub-prd-redis-cache-redis-subnet"
-    error_message = "Production Redis subnet group name incorrect"
-  }
-
-  assert {
-    condition     = output.name.elasticache_parameter_group == "whub-prd-redis-cache-redis-params"
-    error_message = "Production Redis parameter group name incorrect"
+    condition     = output.name_with_suffix.elasticache_cluster == "whub-p-redis-cache-redis"
+    error_message = "Production Redis cluster name incorrect"
   }
 }
 
@@ -148,7 +126,7 @@ run "production_data_lake" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "data-lake"
     criticality = "high"
     backup      = "tier-1"
@@ -158,23 +136,13 @@ run "production_data_lake" {
 
   # S3 bucket names (globally unique, lowercase only)
   assert {
-    condition     = output.name.s3_bucket == "whub-prd-data-lake"
+    condition     = output.name_with_suffix.s3_bucket == "whub-p-data-lake"
     error_message = "Production data lake bucket name incorrect"
-  }
-
-  assert {
-    condition     = output.name.s3_bucket_logs == "whub-prd-data-lake-logs"
-    error_message = "Production logs bucket name incorrect"
-  }
-
-  assert {
-    condition     = output.name.s3_bucket_backups == "whub-prd-data-lake-backups"
-    error_message = "Production backups bucket name incorrect"
   }
 
   # Verify lowercase for S3
   assert {
-    condition     = output.name.s3_bucket == lower(output.name.s3_bucket)
+    condition     = output.name_with_suffix.s3_bucket == lower(output.name_with_suffix.s3_bucket)
     error_message = "S3 bucket name must be lowercase"
   }
 }
@@ -187,7 +155,7 @@ run "production_customer_portal" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "portal"
     criticality = "critical"
     backup      = "none" # Frontend assets don't need backup (stored in git)
@@ -197,19 +165,19 @@ run "production_customer_portal" {
 
   # CloudFront for global CDN
   assert {
-    condition     = output.name.cloudfront_distribution == "whub-prd-portal-cdn"
+    condition     = output.name_with_suffix.cloudfront_distribution == "whub-p-portal-cdn"
     error_message = "Production CloudFront distribution name incorrect"
   }
 
   # WAF for DDoS protection
   assert {
-    condition     = output.name.waf_web_acl_cloudfront == "whub-prd-portal-waf-cdn"
-    error_message = "Production CloudFront WAF ACL name incorrect"
+    condition     = output.name_with_suffix.waf_web_acl == "whub-p-portal-waf"
+    error_message = "Production WAF ACL name incorrect"
   }
 
   # S3 for static assets
   assert {
-    condition     = output.name.s3_bucket == "whub-prd-portal"
+    condition     = output.name_with_suffix.s3_bucket == "whub-p-portal"
     error_message = "Production portal bucket name incorrect"
   }
 }
@@ -222,7 +190,7 @@ run "production_vpc" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "network"
     criticality = "critical"
     backup      = "none"
@@ -232,41 +200,41 @@ run "production_vpc" {
 
   # VPC resources use Name tags
   assert {
-    condition     = output.name_tag.vpc == "whub-prd-network-vpc"
+    condition     = output.name_tag.vpc == "whub-p-network-vpc"
     error_message = "Production VPC name tag incorrect"
   }
 
   # Multi-AZ NAT gateways
   assert {
-    condition     = output.name_tag.nat_gateway == "whub-prd-network-nat-prd"
+    condition     = output.name_tag.nat_gateway == "whub-p-network-nat"
     error_message = "Production NAT gateway name tag incorrect"
   }
 
   # Internet gateway
   assert {
-    condition     = output.name_tag.internet_gateway == "whub-prd-network-igw"
+    condition     = output.name_tag.internet_gateway == "whub-p-network-igw"
     error_message = "Production IGW name tag incorrect"
   }
 
   # Route tables
   assert {
-    condition     = output.name_tag.route_table_public == "whub-prd-network-rt-public"
+    condition     = output.name_tag.route_table_public == "whub-p-network-rt-public"
     error_message = "Production public route table name tag incorrect"
   }
 
   assert {
-    condition     = output.name_tag.route_table_private == "whub-prd-network-rt-private"
+    condition     = output.name_tag.route_table_private == "whub-p-network-rt-private"
     error_message = "Production private route table name tag incorrect"
   }
 
   # Security groups
   assert {
-    condition     = output.name_tag.security_group_alb == "whub-prd-network-alb-sg"
+    condition     = output.name_tag.security_group_alb == "whub-p-network-alb-sg"
     error_message = "Production ALB security group name tag incorrect"
   }
 
   assert {
-    condition     = output.name_tag.security_group_rds == "whub-prd-network-rds-sg"
+    condition     = output.name_tag.security_group_rds == "whub-p-network-rds-sg"
     error_message = "Production RDS security group name tag incorrect"
   }
 }
@@ -279,7 +247,7 @@ run "production_ecs" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "containers"
     criticality = "critical"
     backup      = "none"
@@ -289,30 +257,30 @@ run "production_ecs" {
 
   # ECS cluster
   assert {
-    condition     = output.name.ecs_cluster == "whub-prd-containers-ecs"
+    condition     = output.name_with_suffix.ecs_cluster == "whub-p-containers-ecs"
     error_message = "Production ECS cluster name incorrect"
   }
 
   # ECS service naming
   assert {
-    condition     = output.name.ecs_service == "whub-prd-containers-svc"
+    condition     = output.name_with_suffix.ecs_service == "whub-p-containers-svc"
     error_message = "Production ECS service name incorrect"
   }
 
   # ECS task definition
   assert {
-    condition     = output.name.ecs_task_definition == "whub-prd-containers-task"
+    condition     = output.name_with_suffix.ecs_task_definition == "whub-p-containers-task"
     error_message = "Production ECS task definition name incorrect"
   }
 
   # IAM roles for ECS
   assert {
-    condition     = output.name.ecs_task_execution_role == "whub-prd-containers-ecs-exec-role"
+    condition     = output.name_with_suffix.ecs_task_execution_role == "whub-p-containers-ecs-exec-role"
     error_message = "Production ECS task execution role name incorrect"
   }
 
   assert {
-    condition     = output.name.ecs_task_role == "whub-prd-containers-ecs-task-role"
+    condition     = output.name_with_suffix.ecs_task_role == "whub-p-containers-ecs-task-role"
     error_message = "Production ECS task role name incorrect"
   }
 }
@@ -325,7 +293,7 @@ run "production_lambda" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "webhook-proc"
     criticality = "critical"
     backup      = "none"
@@ -335,25 +303,25 @@ run "production_lambda" {
 
   # Lambda function
   assert {
-    condition     = output.name.lambda == "whub-prd-webhook-proc-lambda"
+    condition     = output.name_with_suffix.lambda == "whub-p-webhook-proc-lambda"
     error_message = "Production Lambda function name incorrect"
   }
 
   # Lambda IAM role
   assert {
-    condition     = output.name.lambda_role == "whub-prd-webhook-proc-lambda-role"
+    condition     = output.name_with_suffix.lambda_role == "whub-p-webhook-proc-lambda-role"
     error_message = "Production Lambda role name incorrect"
   }
 
   # Lambda layer
   assert {
-    condition     = output.name.lambda_layer == "whub-prd-webhook-proc-layer"
+    condition     = output.name_with_suffix.lambda_layer == "whub-p-webhook-proc-layer"
     error_message = "Production Lambda layer name incorrect"
   }
 
   # CloudWatch logs for Lambda
   assert {
-    condition     = output.name.log_group_lambda == "/aws/lambda/whub-prd-webhook-proc"
+    condition     = output.name_with_suffix.log_group_lambda == "/aws/lambda/whub-p-webhook-proc"
     error_message = "Production Lambda log group name incorrect"
   }
 }
@@ -366,7 +334,7 @@ run "production_queues" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "orders"
     criticality = "critical"
     backup      = "none"
@@ -376,25 +344,25 @@ run "production_queues" {
 
   # Standard queue
   assert {
-    condition     = output.name.sqs_queue == "whub-prd-orders-queue"
+    condition     = output.name_with_suffix.sqs_queue == "whub-p-orders-queue"
     error_message = "Production SQS queue name incorrect"
   }
 
   # Dead letter queue
   assert {
-    condition     = output.name.sqs_queue_dlq == "whub-prd-orders-dlq"
+    condition     = output.name_with_suffix.sqs_queue_dlq == "whub-p-orders-dlq"
     error_message = "Production DLQ name incorrect"
   }
 
   # FIFO queue
   assert {
-    condition     = output.name.sqs_queue_fifo == "whub-prd-orders-queue.fifo"
+    condition     = output.name_with_suffix.sqs_queue_fifo == "whub-p-orders-queue.fifo"
     error_message = "Production FIFO queue name incorrect"
   }
 
   # Verify FIFO suffix
   assert {
-    condition     = can(regex("\\.fifo$", output.name.sqs_queue_fifo))
+    condition     = can(regex("\\.fifo$", output.name_with_suffix.sqs_queue_fifo))
     error_message = "Production FIFO queue must end with .fifo"
   }
 }
@@ -407,7 +375,7 @@ run "production_secrets" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "app-secrets"
     criticality = "critical"
     backup      = "tier-1"
@@ -417,23 +385,23 @@ run "production_secrets" {
 
   # Secrets Manager naming
   assert {
-    condition     = output.name.secret == "whub-prd-app-secrets-secret"
+    condition     = output.name_with_suffix.secret == "whub-p-app-secrets-secret"
     error_message = "Production secret name incorrect"
   }
 
   assert {
-    condition     = output.name.secret_db_credentials == "whub-prd-app-secrets/db/credentials"
+    condition     = output.name_with_suffix.secret_db_credentials == "whub-p-app-secrets/db/credentials"
     error_message = "Production DB credentials secret path incorrect"
   }
 
   assert {
-    condition     = output.name.secret_api_key == "whub-prd-app-secrets/api/key"
+    condition     = output.name_with_suffix.secret_api_key == "whub-p-app-secrets/api/key"
     error_message = "Production API key secret path incorrect"
   }
 
   # SSM Parameter Store
   assert {
-    condition     = output.name.ssm_parameter == "/whub-prd-app-secrets"
+    condition     = output.name_with_suffix.ssm_parameter == "/whub-p-app-secrets"
     error_message = "Production SSM parameter path incorrect"
   }
 }
@@ -446,7 +414,7 @@ run "non_production_testing" {
 
   variables {
     product     = "whub"
-    environment = "nprd"
+    environment = "np"
     application = "qa-testing"
     criticality = "medium"
     backup      = "tier-2"
@@ -455,7 +423,7 @@ run "non_production_testing" {
   }
 
   assert {
-    condition     = output.prefix == "whub-nprd-qa-testing"
+    condition     = output.prefix == "whub-np-qa-testing"
     error_message = "Non-production prefix incorrect"
   }
 
@@ -479,7 +447,7 @@ run "production_perkrunner" {
 
   variables {
     product     = "prkr"
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "critical"
     backup      = "tier-1"
@@ -488,7 +456,7 @@ run "production_perkrunner" {
   }
 
   assert {
-    condition     = output.prefix == "prkr-prd-api"
+    condition     = output.prefix == "prkr-p-api"
     error_message = "PerkRunner production prefix incorrect"
   }
 
@@ -512,7 +480,7 @@ run "production_governance" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "audit-logs"
     criticality = "critical"
     backup      = "tier-1"
@@ -527,13 +495,13 @@ run "production_governance" {
 
   # CloudWatch log groups for audit
   assert {
-    condition     = output.name.log_group == "/aws/whub-prd-audit-logs"
+    condition     = output.name_with_suffix.log_group == "/aws/whub-p-audit-logs"
     error_message = "Audit log group name incorrect"
   }
 
   # S3 for audit trail
   assert {
-    condition     = output.name.s3_bucket_logs == "whub-prd-audit-logs-logs"
+    condition     = output.name_with_suffix.s3_bucket == "whub-p-audit-logs"
     error_message = "Audit logs bucket name incorrect"
   }
 }

@@ -16,7 +16,7 @@ run "staging_winehub_api" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "api"
     criticality = "high"
     backup      = "tier-1"
@@ -26,7 +26,7 @@ run "staging_winehub_api" {
 
   # Verify staging-specific configurations
   assert {
-    condition     = output.prefix == "whub-stg-api"
+    condition     = output.prefix == "whub-s-api"
     error_message = "Staging API prefix incorrect"
   }
 
@@ -42,17 +42,17 @@ run "staging_winehub_api" {
 
   # Verify resource names are appropriate for staging
   assert {
-    condition     = output.name.lambda == "whub-stg-api-lambda"
+    condition     = output.name_with_suffix.lambda == "whub-s-api-lambda"
     error_message = "Lambda name for staging API incorrect"
   }
 
   assert {
-    condition     = output.name.alb == "whub-stg-api-alb"
+    condition     = output.name_with_suffix.alb == "whub-s-api-alb"
     error_message = "ALB name for staging API incorrect"
   }
 
   assert {
-    condition     = output.name.ecs_cluster == "whub-stg-api-ecs"
+    condition     = output.name_with_suffix.ecs_cluster == "whub-s-api-ecs"
     error_message = "ECS cluster name for staging API incorrect"
   }
 }
@@ -65,7 +65,7 @@ run "staging_analytics" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "analytics"
     criticality = "medium"
     backup      = "tier-2"
@@ -74,19 +74,19 @@ run "staging_analytics" {
   }
 
   assert {
-    condition     = output.prefix == "whub-stg-analytics"
+    condition     = output.prefix == "whub-s-analytics"
     error_message = "Staging analytics prefix incorrect"
   }
 
   # Verify RDS naming for analytics database
   assert {
-    condition     = output.name.rds_instance == "whub-stg-analytics-rds"
+    condition     = output.name_with_suffix.rds_instance == "whub-s-analytics-rds"
     error_message = "RDS instance name for staging analytics incorrect"
   }
 
   # Verify S3 bucket naming
   assert {
-    condition     = output.name.s3_bucket == "whub-stg-analytics"
+    condition     = output.name_with_suffix.s3_bucket == "whub-s-analytics"
     error_message = "S3 bucket name for staging analytics incorrect"
   }
 
@@ -105,7 +105,7 @@ run "staging_zoho_crm" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "zoho-crm"
     criticality = "medium"
     backup      = "tier-1"
@@ -114,24 +114,24 @@ run "staging_zoho_crm" {
   }
 
   assert {
-    condition     = output.prefix == "whub-stg-zoho-crm"
+    condition     = output.prefix == "whub-s-zoho-crm"
     error_message = "Staging Zoho CRM prefix incorrect"
   }
 
   # Lambda names for integration
   assert {
-    condition     = output.name.lambda == "whub-stg-zoho-crm-lambda"
+    condition     = output.name_with_suffix.lambda == "whub-s-zoho-crm-lambda"
     error_message = "Lambda name for Zoho CRM integration incorrect"
   }
 
   # SQS queues for async processing
   assert {
-    condition     = output.name.sqs_queue == "whub-stg-zoho-crm-queue"
+    condition     = output.name_with_suffix.sqs_queue == "whub-s-zoho-crm-queue"
     error_message = "SQS queue name for Zoho CRM incorrect"
   }
 
   assert {
-    condition     = output.name.sqs_queue_dlq == "whub-stg-zoho-crm-dlq"
+    condition     = output.name_with_suffix.sqs_queue_dlq == "whub-s-zoho-crm-dlq"
     error_message = "DLQ name for Zoho CRM incorrect"
   }
 }
@@ -144,7 +144,7 @@ run "staging_customer_portal" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "cust-portal"
     criticality = "high"
     backup      = "tier-1"
@@ -153,24 +153,24 @@ run "staging_customer_portal" {
   }
 
   assert {
-    condition     = output.prefix == "whub-stg-cust-portal"
+    condition     = output.prefix == "whub-s-cust-portal"
     error_message = "Staging customer portal prefix incorrect"
   }
 
   # Frontend resources
   assert {
-    condition     = output.name.s3_bucket == "whub-stg-cust-portal"
+    condition     = output.name_with_suffix.s3_bucket == "whub-s-cust-portal"
     error_message = "S3 bucket for customer portal incorrect"
   }
 
   assert {
-    condition     = output.name.cloudfront_distribution == "whub-stg-cust-portal-cdn"
+    condition     = output.name_with_suffix.cloudfront_distribution == "whub-s-cust-portal-cdn"
     error_message = "CloudFront distribution name incorrect"
   }
 
   # ALB for backend API
   assert {
-    condition     = output.name.alb == "whub-stg-cust-portal-alb"
+    condition     = output.name_with_suffix.alb == "whub-s-cust-portal-alb"
     error_message = "ALB name for customer portal backend incorrect"
   }
 }
@@ -183,7 +183,7 @@ run "staging_shared_infra" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "vpc-network"
     criticality = "critical"
     backup      = "none"
@@ -198,18 +198,18 @@ run "staging_shared_infra" {
 
   # VPC and networking resources
   assert {
-    condition     = output.name_tag.vpc == "whub-stg-vpc-network-vpc"
+    condition     = output.name_tag.vpc == "whub-s-vpc-network-vpc"
     error_message = "VPC name tag incorrect"
   }
 
   assert {
-    condition     = output.name_tag.nat_gateway == "whub-stg-vpc-network-nat-stg"
+    condition     = output.name_tag.nat_gateway == "whub-s-vpc-network-nat"
     error_message = "NAT gateway name tag incorrect"
   }
 
   # Security groups
   assert {
-    condition     = output.name_tag.security_group_alb == "whub-stg-vpc-network-alb-sg"
+    condition     = output.name_tag.security_group_alb == "whub-s-vpc-network-alb-sg"
     error_message = "ALB security group name tag incorrect"
   }
 }
@@ -222,7 +222,7 @@ run "staging_perkrunner_benefits" {
 
   variables {
     product     = "prkr"
-    environment = "stg"
+    environment = "s"
     application = "benefits"
     criticality = "high"
     backup      = "tier-1"
@@ -231,7 +231,7 @@ run "staging_perkrunner_benefits" {
   }
 
   assert {
-    condition     = output.prefix == "prkr-stg-benefits"
+    condition     = output.prefix == "prkr-s-benefits"
     error_message = "PerkRunner staging benefits prefix incorrect"
   }
 
@@ -255,7 +255,7 @@ run "development_testing" {
 
   variables {
     product     = "whub"
-    environment = "dev"
+    environment = "d"
     application = "feature-test"
     criticality = "low"
     backup      = "none"
@@ -264,7 +264,7 @@ run "development_testing" {
   }
 
   assert {
-    condition     = output.prefix == "whub-dev-feature-test"
+    condition     = output.prefix == "whub-d-feature-test"
     error_message = "Development prefix incorrect"
   }
 
@@ -292,7 +292,7 @@ run "staging_webhooks" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "webhooks"
     criticality = "high"
     backup      = "tier-1"
@@ -302,24 +302,19 @@ run "staging_webhooks" {
 
   # SQS queues for webhook processing
   assert {
-    condition     = output.name.sqs_queue == "whub-stg-webhooks-queue"
+    condition     = output.name_with_suffix.sqs_queue == "whub-s-webhooks-queue"
     error_message = "Webhook queue name incorrect"
-  }
-
-  assert {
-    condition     = output.name.sqs_queue_high_priority == "whub-stg-webhooks-priority-queue"
-    error_message = "High priority webhook queue name incorrect"
   }
 
   # Lambda for webhook processing
   assert {
-    condition     = output.name.lambda == "whub-stg-webhooks-lambda"
+    condition     = output.name_with_suffix.lambda == "whub-s-webhooks-lambda"
     error_message = "Webhook Lambda name incorrect"
   }
 
   # DynamoDB for webhook state
   assert {
-    condition     = output.name.dynamodb_table == "whub-stg-webhooks-table"
+    condition     = output.name_with_suffix.dynamodb_table == "whub-s-webhooks-table"
     error_message = "DynamoDB table name for webhooks incorrect"
   }
 }
@@ -332,7 +327,7 @@ run "staging_observability" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "monitoring"
     criticality = "medium"
     backup      = "none"
@@ -342,18 +337,18 @@ run "staging_observability" {
 
   # CloudWatch resources
   assert {
-    condition     = output.name.log_group == "/aws/whub-stg-monitoring"
+    condition     = output.name_with_suffix.log_group == "/aws/whub-s-monitoring"
     error_message = "CloudWatch log group name incorrect"
   }
 
   assert {
-    condition     = output.name.dashboard == "whub-stg-monitoring-dashboard"
+    condition     = output.name_with_suffix.dashboard == "whub-s-monitoring-dashboard"
     error_message = "CloudWatch dashboard name incorrect"
   }
 
   # EventBridge for event routing
   assert {
-    condition     = output.name.eventbridge_rule == "whub-stg-monitoring-rule"
+    condition     = output.name_with_suffix.eventbridge_rule == "whub-s-monitoring-rule"
     error_message = "EventBridge rule name incorrect"
   }
 }

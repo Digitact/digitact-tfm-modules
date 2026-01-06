@@ -16,7 +16,7 @@ run "valid_short_prefix" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "api"
     criticality = "high"
     backup      = "tier-1"
@@ -26,20 +26,26 @@ run "valid_short_prefix" {
 
   # Verify prefix is correct
   assert {
-    condition     = output.prefix == "whub-stg-api"
-    error_message = "Prefix should be 'whub-stg-api' but got '${output.prefix}'"
+    condition     = output.prefix == "whub-s-api"
+    error_message = "Prefix should be 'whub-s-api' but got '${output.prefix}'"
   }
 
   # Verify prefix length is acceptable
   assert {
-    condition     = length(output.prefix) == 12
-    error_message = "Prefix length should be 12 characters but got ${length(output.prefix)}"
+    condition     = length(output.prefix) == 10
+    error_message = "Prefix length should be 10 characters but got ${length(output.prefix)}"
   }
 
-  # Verify ALB name is within limits (should be 15 chars: whub-stg-api-alb)
+  # Verify clean name matches prefix (simplified naming)
   assert {
-    condition     = length(output.name.alb) <= 26
-    error_message = "ALB name '${output.name.alb}' is ${length(output.name.alb)} chars, should be ≤26 to allow 6-char suffix"
+    condition     = output.name == "whub-s-api"
+    error_message = "Clean name should be 'whub-s-api' but got '${output.name}'"
+  }
+
+  # Verify ALB name with suffix is within limits
+  assert {
+    condition     = length(output.name_with_suffix.alb) <= 32
+    error_message = "ALB name '${output.name_with_suffix.alb}' is ${length(output.name_with_suffix.alb)} chars, should be ≤32"
   }
 
   # Verify mandatory tags are present
@@ -67,7 +73,7 @@ run "valid_longer_prefix" {
 
   variables {
     product     = "whub"
-    environment = "nprd"
+    environment = "np"
     application = "analytics"
     criticality = "medium"
     backup      = "tier-2"
@@ -77,14 +83,14 @@ run "valid_longer_prefix" {
 
   # Verify prefix is constructed correctly
   assert {
-    condition     = output.prefix == "whub-nprd-analytics"
-    error_message = "Expected 'whub-nprd-analytics' but got '${output.prefix}'"
+    condition     = output.prefix == "whub-np-analytics"
+    error_message = "Expected 'whub-np-analytics' but got '${output.prefix}'"
   }
 
-  # This is intentionally near the limit - 19 chars, well within the 22-char safe limit
+  # This is within the 32-char limit
   assert {
-    condition     = length(output.prefix) <= 22
-    error_message = "Prefix length ${length(output.prefix)} exceeds safe limit of 22 characters"
+    condition     = length(output.prefix) <= 32
+    error_message = "Prefix length ${length(output.prefix)} exceeds limit of 32 characters"
   }
 }
 
@@ -96,7 +102,7 @@ run "s3_lowercase_check" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "data-lake"
     criticality = "critical"
     backup      = "tier-1"
@@ -104,10 +110,16 @@ run "s3_lowercase_check" {
     repository  = "test-repo"
   }
 
-  # Verify S3 bucket name contains only lowercase
+  # Verify S3 bucket name contains only lowercase (using clean name)
   assert {
-    condition     = can(regex("^[a-z0-9-]+$", output.name.s3_bucket))
+    condition     = can(regex("^[a-z0-9-]+$", output.name))
     error_message = "S3 bucket name must contain only lowercase letters, numbers, and hyphens"
+  }
+
+  # Verify S3 bucket suffix output also lowercase
+  assert {
+    condition     = can(regex("^[a-z0-9-]+$", output.name_with_suffix.s3_bucket))
+    error_message = "S3 bucket suffix name must contain only lowercase letters, numbers, and hyphens"
   }
 
   # Verify no uppercase in prefix
@@ -125,7 +137,7 @@ run "no_consecutive_hyphens" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "web-api"
     criticality = "high"
     backup      = "none"
@@ -139,9 +151,15 @@ run "no_consecutive_hyphens" {
     error_message = "Prefix contains consecutive hyphens which violates AWS naming rules"
   }
 
-  # Verify RDS instance name compliance
+  # Verify clean name has no consecutive hyphens
   assert {
-    condition     = !can(regex("--", output.name.rds_instance))
+    condition     = !can(regex("--", output.name))
+    error_message = "Name contains consecutive hyphens"
+  }
+
+  # Verify RDS instance name compliance (using suffix output)
+  assert {
+    condition     = !can(regex("--", output.name_with_suffix.rds_instance))
     error_message = "RDS instance name contains consecutive hyphens"
   }
 }
@@ -154,7 +172,7 @@ run "no_leading_trailing_hyphens" {
 
   variables {
     product     = "prkr"
-    environment = "prd"
+    environment = "p"
     application = "benefits"
     criticality = "critical"
     backup      = "tier-1"
@@ -183,7 +201,7 @@ run "sqs_fifo_naming" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "orders"
     criticality = "critical"
     backup      = "none"
@@ -193,13 +211,13 @@ run "sqs_fifo_naming" {
 
   # Verify FIFO queue has .fifo suffix
   assert {
-    condition     = can(regex("\\.fifo$", output.name.sqs_queue_fifo))
+    condition     = can(regex("\\.fifo$", output.name_with_suffix.sqs_queue_fifo))
     error_message = "FIFO queue name must end with .fifo"
   }
 
   # Verify standard queue doesn't have .fifo
   assert {
-    condition     = !can(regex("\\.fifo", output.name.sqs_queue))
+    condition     = !can(regex("\\.fifo", output.name_with_suffix.sqs_queue))
     error_message = "Standard queue should not have .fifo suffix"
   }
 }
@@ -212,7 +230,7 @@ run "output_keys_exist" {
 
   variables {
     product     = "whub"
-    environment = "dev"
+    environment = "d"
     application = "test"
     criticality = "low"
     backup      = "none"
@@ -222,27 +240,27 @@ run "output_keys_exist" {
 
   # Verify critical output keys exist
   assert {
-    condition     = output.name.lambda != null && output.name.lambda != ""
+    condition     = output.name_with_suffix.lambda != null && output.name_with_suffix.lambda != ""
     error_message = "Lambda name output is missing or empty"
   }
 
   assert {
-    condition     = output.name.alb != null && output.name.alb != ""
+    condition     = output.name_with_suffix.alb != null && output.name_with_suffix.alb != ""
     error_message = "ALB name output is missing or empty"
   }
 
   assert {
-    condition     = output.name.rds_instance != null && output.name.rds_instance != ""
+    condition     = output.name_with_suffix.rds_instance != null && output.name_with_suffix.rds_instance != ""
     error_message = "RDS instance name output is missing or empty"
   }
 
   assert {
-    condition     = output.name.s3_bucket != null && output.name.s3_bucket != ""
+    condition     = output.name_with_suffix.s3_bucket != null && output.name_with_suffix.s3_bucket != ""
     error_message = "S3 bucket name output is missing or empty"
   }
 
   assert {
-    condition     = output.name.sqs_queue != null && output.name.sqs_queue != ""
+    condition     = output.name_with_suffix.sqs_queue != null && output.name_with_suffix.sqs_queue != ""
     error_message = "SQS queue name output is missing or empty"
   }
 
@@ -260,7 +278,7 @@ run "environment_display_names" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "api"
     criticality = "critical"
     backup      = "tier-1"
@@ -282,7 +300,7 @@ run "tags_with_name_helper" {
 
   variables {
     product     = "whub"
-    environment = "stg"
+    environment = "s"
     application = "web"
     criticality = "medium"
     backup      = "tier-2"
@@ -292,7 +310,7 @@ run "tags_with_name_helper" {
 
   # Verify tags_with_name includes Name tag
   assert {
-    condition     = output.tags_with_name.vpc.Name == "whub-stg-web-vpc"
+    condition     = output.tags_with_name.vpc.Name == "whub-s-web-vpc"
     error_message = "VPC Name tag incorrect"
   }
 
@@ -316,7 +334,7 @@ run "additional_tags_merge" {
 
   variables {
     product     = "whub"
-    environment = "prd"
+    environment = "p"
     application = "crm"
     criticality = "high"
     backup      = "tier-1"

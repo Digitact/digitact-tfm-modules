@@ -19,27 +19,30 @@ variable "product" {
 }
 
 variable "environment" {
-  description = "Environment code (prd, nprd, dev, stg)"
+  description = "Environment code (p=production, pp=preprod, np=nonprod, s=staging, u=uat, t=test, d=development)"
   type        = string
 
   validation {
-    condition     = contains(["prd", "nprd", "dev", "stg"], var.environment)
-    error_message = "Environment must be one of: prd, nprd, dev, stg"
+    condition     = contains(["p", "pp", "np", "s", "u", "t", "d"], var.environment)
+    error_message = "Environment must be one of: p (production), pp (preprod), np (nonprod), s (staging), u (uat), t (test), d (development)"
   }
 }
 
 variable "application" {
   description = <<-EOD
-    Application name (e.g., zoho-crm, analytics, api)
+    Application name (e.g., zoho-crm, analytics, api, observability)
 
-    IMPORTANT: Total prefix length (product-env-app) should not exceed 22 characters
-    to ensure compatibility with ALB/NLB resources and allow 6-character developer suffixes.
+    Naming pattern: {product}-{env}-{app}
+    Example: whub-np-observability (21 chars)
+
+    Recommended: Keep total prefix under 32 characters for ALB/NLB compatibility.
+    With short environments (p, np, d, s), you have plenty of room for descriptive names.
 
     Examples:
-    - whub-prd-api (11 chars) ✓
-    - whub-prd-analytics (17 chars) ✓
-    - whub-nprd-zoho-crm (16 chars) ✓
-    - whub-prd-customer-portal (23 chars) ✗ TOO LONG for ALB/NLB
+    - whub-p-api (10 chars) ✓
+    - whub-p-analytics (16 chars) ✓
+    - whub-np-observability (21 chars) ✓
+    - whub-p-customer-portal (22 chars) ✓
   EOD
   type        = string
 
@@ -49,8 +52,8 @@ variable "application" {
   }
 
   validation {
-    condition     = length(var.application) >= 3 && length(var.application) <= 20
-    error_message = "Application name must be 3-20 characters long to ensure total prefix stays within AWS resource naming limits."
+    condition     = length(var.application) >= 3 && length(var.application) <= 50
+    error_message = "Application name must be 3-50 characters long."
   }
 
   validation {
@@ -116,3 +119,4 @@ variable "additional_tags" {
   type        = map(string)
   default     = {}
 }
+

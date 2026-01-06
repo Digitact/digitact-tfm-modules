@@ -9,34 +9,32 @@
 
 locals {
   # Base naming prefix: {product}-{env}-{app}
-  # Example: "whub-prd-zoho-crm"
+  # Example: "whub-np-observability"
+  # No resource-type suffixes - keeps names simple and consistent
   prefix = "${var.product}-${var.environment}-${var.application}"
 
   # Calculate prefix length for validation
   prefix_length = length(local.prefix)
 
   # ==========================================================================
-  # AWS RESOURCE NAMING CONSTRAINTS
-
+  # Naming Validation
   # ==========================================================================
-  # VALIDATION: Check prefix against most restrictive limit
-  # ==========================================================================
-  # The most restrictive resource is Target Group at max_prefix=18 characters
-  # However, this would be too restrictive for general use.
-  #
-  # We'll validate against ALB/NLB limit (22 chars) as a practical maximum
-  # and document resources that need shorter prefixes.
-
-  max_safe_prefix_length = 22 # Based on ALB/NLB constraints (32 char limit - 4 suffix - 6 reserved)
+  # Set to 32 chars (ALB/NLB AWS limit) - fits most use cases
+  # With short environments (p, np, etc), names like "whub-np-observability"
+  # easily fit within this limit
+  max_prefix_length = 32
 
   # ==========================================================================
   # Environment Display Mapping
   # ==========================================================================
   environment_display = {
-    prd  = "production"
-    nprd = "nonprod"
-    dev  = "development"
-    stg  = "staging"
+    p  = "production"
+    pp = "preprod"
+    np = "nonprod"
+    s  = "staging"
+    u  = "uat"
+    t  = "test"
+    d  = "development"
   }
 
   # ==========================================================================
@@ -57,16 +55,13 @@ locals {
 # VALIDATION CHECKS (Terraform will fail if these conditions aren't met)
 # =============================================================================
 
-# Check 1: Prefix length should not exceed safe limit for ALB/NLB
+# Check 1: Prefix length validation
 check "prefix_length_validation" {
   assert {
-    condition     = local.prefix_length <= local.max_safe_prefix_length
+    condition     = local.prefix_length <= local.max_prefix_length
     error_message = <<-EOT
       Naming prefix '${local.prefix}' is ${local.prefix_length} characters long.
-
-      Maximum recommended length is ${local.max_safe_prefix_length} characters to ensure:
-      - ALB/NLB names fit within 32-character AWS limit
-      - 6 characters reserved for developer suffixes (e.g., "-abcde")
+      Maximum allowed: ${local.max_prefix_length} characters (ALB/NLB compatibility)
 
       Current breakdown:
       - Product: '${var.product}' (${length(var.product)} chars)
@@ -74,17 +69,28 @@ check "prefix_length_validation" {
       - Application: '${var.application}' (${length(var.application)} chars)
       - Hyphens: 2
       - Total: ${local.prefix_length} chars
+      - Over limit by: ${local.prefix_length - local.max_prefix_length} chars
 
-      To fix:
-      1. Shorten application name to ${22 - length(var.product) - length(var.environment) - 2} characters or less
-      2. Use shorter product code (current: ${length(var.product)} chars)
-      3. Consider using abbreviations
+      TO FIX (choose one):
 
-      Example valid names:
-      - whub-prd-api (11 chars) ✓
-      - whub-prd-analytics (17 chars) ✓
-      - whub-nprd-zoho-crm (16 chars) ✓
-      - whub-prd-customer-portal (23 chars) ✗ TOO LONG
+      Option 1: Shorten application name (recommended)
+        Reduce to ${local.max_prefix_length - length(var.product) - length(var.environment) - 2} characters or less
+        Example: "customer-portal" → "custport" (saves 8 chars)
+
+      Option 2: Use shorter product code
+        Current: product = "${var.product}" (${length(var.product)} chars)
+        Example: "whub" → "wh" (saves 2 chars)
+
+      Option 3: Use abbreviated environment (if not already)
+        Current options: p, pp, np, s, u, t, d (1-2 chars each)
+
+      VALID EXAMPLES:
+      - whub-p-api (10 chars) ✓
+      - whub-p-analytics (16 chars) ✓
+      - whub-np-observability (21 chars) ✓
+      - whub-p-customer-portal (22 chars) ✓
+
+      Note: Resource type is identified by AWS resource tags, not the name suffix.
     EOT
   }
 }
